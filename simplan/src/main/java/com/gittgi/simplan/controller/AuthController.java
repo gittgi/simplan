@@ -55,4 +55,9 @@ public class AuthController {
         return userParameterDto.getUsername();
     }
 
+    @GetMapping("/healthcheck")
+    public String healthcheck() {
+        return "ok";
+    }
+
 }

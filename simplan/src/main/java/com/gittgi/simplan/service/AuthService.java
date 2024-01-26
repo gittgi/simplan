@@ -65,7 +65,7 @@ public class AuthService {
         redisTemplate.opsForValue().set(
                 username,
                 newRefreshToken,
-                60*60*1000*24L,
+                10*60*60*1000*24L,
                 TimeUnit.MILLISECONDS
         );
 

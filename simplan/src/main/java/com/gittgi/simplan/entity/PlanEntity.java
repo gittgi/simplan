@@ -45,6 +45,8 @@ public class PlanEntity {
 
     private LocalDateTime realEndTime;
 
+    private Boolean deleted = Boolean.FALSE;
+
     @ManyToOne
     @JoinColumn(name = "USER_ID")
     private UserEntity user;

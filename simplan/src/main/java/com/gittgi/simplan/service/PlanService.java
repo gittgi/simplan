@@ -1,7 +1,9 @@
 package com.gittgi.simplan.service;
 
+import com.gittgi.simplan.domain.PlanStatus;
 import com.gittgi.simplan.dto.UserParameterDTO;
 import com.gittgi.simplan.dto.request.PlanPostRequestDto;
+import com.gittgi.simplan.dto.request.PlanPutRequestDto;
 import com.gittgi.simplan.dto.response.PlanResponseDto;
 import com.gittgi.simplan.entity.PlanEntity;
 import com.gittgi.simplan.entity.UserEntity;
@@ -39,16 +41,14 @@ public class PlanService {
 
 
 
-    public Map<Integer, List<PlanResponseDto>> getDailySchedule(UserParameterDTO userParameterDTO, LocalDate date) {
+    public Map<LocalDate, List<PlanResponseDto>> getDailySchedule(UserParameterDTO userParameterDTO, LocalDate date) {
         UserEntity user = userRepository.findByUsername(userParameterDTO.getUsername());
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
-
         List<PlanEntity> dailyPlan = planRepository.findDailyPlan(user, start, end);
-        int day = date.getDayOfMonth();
         List<PlanResponseDto> planResponseDtoList = makePlanResponseDtoList(dailyPlan);
-        Map<Integer, List<PlanResponseDto>> dailySchedule = new HashMap<>();
-        dailySchedule.put(day, planResponseDtoList);
+        Map<LocalDate, List<PlanResponseDto>> dailySchedule = new HashMap<>();
+        dailySchedule.put(date, planResponseDtoList);
         return dailySchedule;
 
 
@@ -56,7 +56,7 @@ public class PlanService {
 
 
 
-    public Map<Integer, List<PlanResponseDto>> getWeeklySchedule(UserParameterDTO userParameterDTO, LocalDate date) {
+    public Map<LocalDate, List<PlanResponseDto>> getWeeklySchedule(UserParameterDTO userParameterDTO, LocalDate date) {
         UserEntity user = userRepository.findByUsername(userParameterDTO.getUsername());
         int day = date.get(ChronoField.DAY_OF_WEEK);
         if (day == 7) {
@@ -70,11 +70,11 @@ public class PlanService {
         List<PlanEntity> weeklyPlan = planRepository.findDailyPlan(user, weekStart, weekEnd);
         List<PlanResponseDto> tempWeeklyPlan = makePlanResponseDtoList(weeklyPlan);
 
-        return tempWeeklyPlan.stream().collect(Collectors.groupingBy(p -> p.getPlanStartTime().getDayOfMonth()));
+        return tempWeeklyPlan.stream().collect(Collectors.groupingBy(p -> p.getPlanStartTime().toLocalDate()));
 
     }
 
-    public Map<Integer, List<PlanResponseDto>> getMonthlySchedule(UserParameterDTO userParameterDTO, LocalDate date) {
+    public Map<LocalDate, List<PlanResponseDto>> getMonthlySchedule(UserParameterDTO userParameterDTO, LocalDate date) {
         UserEntity user = userRepository.findByUsername(userParameterDTO.getUsername());
 
         LocalDate start = date.withDayOfMonth(1);
@@ -85,9 +85,11 @@ public class PlanService {
         List<PlanEntity> monthlyPlan = planRepository.findDailyPlan(user, monthStart, monthEnd);
         List<PlanResponseDto> tempMonthlyPlan = makePlanResponseDtoList(monthlyPlan);
 
-        return tempMonthlyPlan.stream().collect(Collectors.groupingBy(p -> p.getPlanStartTime().getDayOfMonth()));
+        return tempMonthlyPlan.stream().collect(Collectors.groupingBy(p -> p.getPlanStartTime().toLocalDate()));
 
     }
+
+
 
     private List<PlanResponseDto> makePlanResponseDtoList(List<PlanEntity> dailyPlan) {
         List<PlanResponseDto> planResponseDtoList = dailyPlan.stream().map(planEntity -> {
@@ -110,11 +112,6 @@ public class PlanService {
 
 
 
-
-
-
-
-
     private PlanEntity makePlan(PlanPostRequestDto planRequest, UserEntity user) {
         PlanEntity plan = new PlanEntity();
         plan.setTitle(planRequest.getTitle());
@@ -128,4 +125,45 @@ public class PlanService {
     }
 
 
+    public Long changeStatus(UserParameterDTO userParameterdto, Long planId, PlanStatus newStatus) {
+        UserEntity user = userRepository.findByUsername(userParameterdto.getUsername());
+        PlanEntity plan = planRepository.findById(planId).orElseThrow(() -> new RuntimeException("해당 Plan이 없습니다."));
+        if (plan.getUser() != user) {
+            throw new RuntimeException("해당 플랜의 소유자 계정이 아닙니다.");
+        }
+        plan.setStatus(newStatus);
+        return plan.getId();
+    }
+
+    public Long deletePlan(UserParameterDTO userParameterDTO, Long planId) {
+        UserEntity user = userRepository.findByUsername(userParameterDTO.getUsername());
+        PlanEntity plan = planRepository.findById(planId).orElseThrow(() -> new RuntimeException("해당 Plan이 없습니다."));
+        if (plan.getUser() != user) {
+            throw new RuntimeException("해당 플랜의 소유자 계정이 아닙니다.");
+        }
+        plan.setDeleted(Boolean.TRUE);
+        return plan.getId();
+    }
+
+    public Long modifyPlan(UserParameterDTO userParameterDTO, Long planId, PlanPutRequestDto planPutRequestDto) {
+        UserEntity user = userRepository.findByUsername(userParameterDTO.getUsername());
+        PlanEntity plan = planRepository.findById(planId).orElseThrow(() -> new RuntimeException("해당 Plan이 없습니다."));
+        if (plan.getUser() != user) {
+            throw new RuntimeException("해당 플랜의 소유자 계정이 아닙니다.");
+        }
+        changePlan(planPutRequestDto, plan);
+        return planId;
+    }
+
+    private void changePlan(PlanPutRequestDto planPutRequestDto, PlanEntity plan) {
+        plan.setTitle(planPutRequestDto.getTitle());
+        plan.setContent(planPutRequestDto.getContent());
+        plan.setStatus(planPutRequestDto.getStatus());
+        plan.setCategory(planPutRequestDto.getCategory());
+        plan.setIsImportant(planPutRequestDto.getIsImportant());
+        plan.setPlanStartTime(planPutRequestDto.getPlanStartTime());
+        plan.setPlanEndTime(planPutRequestDto.getPlanEndTime());
+        plan.setRealStartTime(planPutRequestDto.getRealStartTime());
+        plan.setRealEndTime(planPutRequestDto.getRealEndTime());
+    }
 }
