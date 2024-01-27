@@ -7,6 +7,7 @@ import com.gittgi.simplan.dto.TokenDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
@@ -38,7 +40,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-
+        log.info("attemptAuthentication start, request = {}", request);
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
@@ -78,12 +80,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 TimeUnit.MILLISECONDS
         );
 
+        log.info("login success");
 
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-
+        log.info("login fail");
         response.setStatus(401);
     }
 }

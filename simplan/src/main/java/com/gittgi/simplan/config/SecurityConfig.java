@@ -4,6 +4,7 @@ import com.gittgi.simplan.jwt.JWTFilter;
 import com.gittgi.simplan.jwt.JWTUtil;
 import com.gittgi.simplan.jwt.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
 
+
     public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RedisTemplate<String, String> redisTemplate) {
 
         this.authenticationConfiguration = authenticationConfiguration;
@@ -50,12 +52,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+
         http
                 .cors((cors) -> cors.configurationSource(new CorsConfigurationSource() {
+
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
                         configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.addAllowedOrigin("https://simplan-next.vercel.app");
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
