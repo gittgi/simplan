@@ -5,5 +5,5 @@ public enum PlanCategory {
     INDIRECT,
     PRIVATE,
     SELFDEV,
-    NETWORKING
+    NETWORK
 }
