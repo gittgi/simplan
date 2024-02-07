@@ -38,4 +38,4 @@ out/
 
 
 Dockerfile
-application.yml
+.yml
