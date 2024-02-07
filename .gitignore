@@ -38,4 +38,4 @@ out/
 
 
 Dockerfile
-*.yml
+/src/main/resources/application.yml
