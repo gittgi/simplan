@@ -7,6 +7,8 @@ import com.gittgi.simplan.dto.request.PlanPutRequestDto;
 import com.gittgi.simplan.dto.response.PlanResponseDto;
 import com.gittgi.simplan.entity.PlanEntity;
 import com.gittgi.simplan.entity.UserEntity;
+import com.gittgi.simplan.error.code.PlanErrorCode;
+import com.gittgi.simplan.error.exception.ErrorException;
 import com.gittgi.simplan.repository.PlanRepository;
 import com.gittgi.simplan.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -114,6 +116,12 @@ public class PlanService {
 
     private PlanEntity makePlan(PlanPostRequestDto planRequest, UserEntity user) {
         PlanEntity plan = new PlanEntity();
+
+        if (planRequest.getTitle() == null || planRequest.getTitle().isEmpty()) {
+            log.info("Plan Title 없음");
+            throw new ErrorException(PlanErrorCode.TITLE_REQUIRED);
+        }
+
         plan.setTitle(planRequest.getTitle());
         plan.setContent(planRequest.getContent());
         plan.setIsImportant(planRequest.getIsImportant());
