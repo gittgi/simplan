@@ -29,6 +29,8 @@ public class UserEntity {
 
     private String role;
 
+    private String social = null;
+
     @OneToMany(mappedBy = "user")
     private List<PlanEntity> plans = new ArrayList<>();
 }

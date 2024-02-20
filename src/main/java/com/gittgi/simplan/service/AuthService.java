@@ -4,6 +4,8 @@ package com.gittgi.simplan.service;
 import com.gittgi.simplan.dto.JoinDTO;
 import com.gittgi.simplan.dto.TokenDTO;
 import com.gittgi.simplan.entity.UserEntity;
+import com.gittgi.simplan.error.code.AccountErrorCode;
+import com.gittgi.simplan.error.exception.ErrorException;
 import com.gittgi.simplan.jwt.JWTUtil;
 import com.gittgi.simplan.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class AuthService {
         Boolean isExist = userRepository.existsByUsername(username);
 
         if (isExist) {
-            return;
+            throw new ErrorException(AccountErrorCode.ID_DUPLICATION);
         }
 
         UserEntity data = new UserEntity();

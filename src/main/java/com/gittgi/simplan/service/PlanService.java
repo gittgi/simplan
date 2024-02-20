@@ -117,7 +117,7 @@ public class PlanService {
     private PlanEntity makePlan(PlanPostRequestDto planRequest, UserEntity user) {
         PlanEntity plan = new PlanEntity();
 
-        if (planRequest.getTitle() == null || planRequest.getTitle().isEmpty()) {
+        if (planRequest.getTitle() == null || planRequest.getTitle().trim().isEmpty()) {
             log.info("Plan Title 없음");
             throw new ErrorException(PlanErrorCode.TITLE_REQUIRED);
         }
