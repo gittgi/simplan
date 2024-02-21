@@ -80,7 +80,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 TimeUnit.MILLISECONDS
         );
 
-        log.info("login success");
+        log.info("Normal login success");
 
     }
 

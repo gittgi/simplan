@@ -3,8 +3,10 @@ package com.gittgi.simplan.config;
 import com.gittgi.simplan.jwt.JWTFilter;
 import com.gittgi.simplan.jwt.JWTUtil;
 import com.gittgi.simplan.jwt.LoginFilter;
+import com.gittgi.simplan.oauth.CustomSuccessHandler;
 import com.gittgi.simplan.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,21 +27,16 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
 
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RedisTemplate<String, String> redisTemplate, CustomOAuth2UserService customOAuth2UserService) {
-
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-        this.redisTemplate = redisTemplate;
-        this.customOAuth2UserService = customOAuth2UserService;
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -94,7 +91,8 @@ public class SecurityConfig {
         http
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService)));
+                                .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler));
 
 
         http

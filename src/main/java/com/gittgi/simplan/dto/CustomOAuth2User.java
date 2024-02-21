@@ -1,5 +1,7 @@
 package com.gittgi.simplan.dto;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -7,13 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+@Slf4j
+@RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
 
     private final UserDto userDto;
-
-    public CustomOAuth2User(UserDto userDto) {
-        this.userDto = userDto;
-    }
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -35,7 +35,8 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return null;
+        // 이부분 필수 -> principalName으로 사용됨
+        return userDto.getUsername();
     }
 
     public String getUsername() {
