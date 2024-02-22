@@ -5,9 +5,12 @@ import com.gittgi.simplan.dto.JoinDTO;
 import com.gittgi.simplan.dto.TokenDTO;
 import com.gittgi.simplan.dto.UserParameterDTO;
 import com.gittgi.simplan.service.AuthService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,12 +32,10 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public TokenDTO reissueToken(HttpServletRequest request) {
-        //request에서 Authorization 헤더를 찾음
-        String authorization = request.getHeader("Authorization");
+    public TokenDTO reissueToken(HttpServletRequest request, HttpServletResponse response, @CookieValue("RefreshToken") String refreshToken) {
 
         //Authorization 헤더 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        if (refreshToken == null) {
 
             log.info("토큰 없음");
 
@@ -42,9 +43,8 @@ public class AuthController {
             throw new RuntimeException("token null");
         }
 
-        String refreshToken = authorization.split(" ")[1];
 
-        return authService.generateNewToken(refreshToken);
+        return authService.generateNewToken(refreshToken, response);
 
     }
 
