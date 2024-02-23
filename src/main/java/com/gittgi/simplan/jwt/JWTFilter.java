@@ -3,6 +3,8 @@ package com.gittgi.simplan.jwt;
 
 import com.gittgi.simplan.dto.CustomUserDetails;
 import com.gittgi.simplan.entity.UserEntity;
+import com.gittgi.simplan.error.code.TokenErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -61,20 +63,29 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String token = authorization.split(" ")[1];
-
+        log.info("토큰 소멸시간 검증 전");
         //토큰 소멸 시간 검증
-        if (jwtUtil.isExpired(token)) {
+        try {
+            jwtUtil.isExpired(token);
+            log.info("토큰 소멸시간 검증");
+        } catch (ExpiredJwtException e) {
 
             log.info("token expired");
+            request.setAttribute("exception", TokenErrorCode.EXPIRED_TOKEN);
             filterChain.doFilter(request, response);
 
             //조건이 해당되면 메소드 종료 (필수)
             return;
         }
 
+
         if (jwtUtil.getType(token).equals("RTK") && !request.getRequestURI().equals("/reissue")) {
             log.info("refresh token to access");
-            throw new JwtException("잘못된 유형의 토큰");
+            log.info("token expired");
+            request.setAttribute("exception", TokenErrorCode.WRONG_TYPE_TOKEN);
+            filterChain.doFilter(request, response);
+
+            return;
         }
 
 

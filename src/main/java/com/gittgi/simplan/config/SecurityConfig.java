@@ -1,5 +1,8 @@
 package com.gittgi.simplan.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gittgi.simplan.error.handler.CustomAccessDeniedHandler;
+import com.gittgi.simplan.error.handler.CustomAuthenticationEntryPoint;
 import com.gittgi.simplan.jwt.JWTFilter;
 import com.gittgi.simplan.jwt.JWTUtil;
 import com.gittgi.simplan.jwt.LoginFilter;
@@ -11,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -19,6 +23,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -110,6 +115,12 @@ public class SecurityConfig {
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // 인증 실패시 처리 하는 핸들러 설정
+        http
+                .exceptionHandling((exceptionHandler) -> exceptionHandler
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint(new ObjectMapper()))
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()));
 
         return http.build();
     }

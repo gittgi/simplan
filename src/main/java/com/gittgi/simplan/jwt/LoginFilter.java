@@ -4,6 +4,9 @@ package com.gittgi.simplan.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gittgi.simplan.dto.CustomUserDetails;
 import com.gittgi.simplan.dto.TokenDTO;
+import com.gittgi.simplan.error.code.ErrorCode;
+import com.gittgi.simplan.error.code.TokenErrorCode;
+import com.gittgi.simplan.error.response.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -68,7 +71,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         //TODO:토큰 발급 및 respponse 만드는 로직 모듈화 하기
-        String accessToken = jwtUtil.createJwt(username, role, 10*60*60*1000L, "ATK");
+        String accessToken = jwtUtil.createJwt(username, role, 10 * 60 * 60 * 1000L, "ATK");
         String refreshToken = jwtUtil.createJwt(username, role, 10*60*60*1000*24L, "RTK");
         TokenDTO tokenDto = new TokenDTO();
         tokenDto.setAccessToken(accessToken);
@@ -89,9 +92,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         //TODO: Login 실패시, 실패 원인을 request에 exception 헤더에 넣고, 그걸 꺼내서 적절한 response로 반환하기
         log.info("login fail");
+
         response.setStatus(401);
     }
 
@@ -105,5 +109,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 .maxAge(Duration.ofDays(1))
                 .build();
     }
+
+
+
 
 }
