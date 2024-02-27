@@ -1,10 +1,10 @@
 package com.gittgi.simplan.config;
 
+import com.gittgi.simplan.filter.ExceptionHandlerFilter;
 import com.gittgi.simplan.jwt.JWTFilter;
 import com.gittgi.simplan.jwt.JWTUtil;
 import com.gittgi.simplan.jwt.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,12 +29,15 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
 
+    private final ExceptionHandlerFilter exceptionHandlerFilter;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RedisTemplate<String, String> redisTemplate) {
+
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RedisTemplate<String, String> redisTemplate, ExceptionHandlerFilter exceptionHandlerFilter) {
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
+        this.exceptionHandlerFilter = exceptionHandlerFilter;
     }
 
     @Bean
@@ -98,6 +101,9 @@ public class SecurityConfig {
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisTemplate), UsernamePasswordAuthenticationFilter.class);
 
+        // exceptionHandler 필터를 먼저 두기
+        http
+                .addFilterBefore(exceptionHandlerFilter, JWTFilter.class);
         //세션 설정
         http
                 .sessionManagement((session) -> session
